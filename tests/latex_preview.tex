@@ -1,0 +1,55 @@
+\documentclass{exam}
+
+% Packages ----------------------------------------------------------------------------------------
+% Style
+\usepackage{geometry}
+  \geometry{verbose,tmargin=2.5cm,bmargin=2cm,lmargin=2cm,rmargin=2cm,headsep=1cm,footskip=1cm}
+\usepackage{setspace}
+  \onehalfspacing
+% Math
+\usepackage{amsmath}
+% -------------------------------------------------------------------------------------------------
+
+% Wraper for choices ------------------------------------------------------------------------------
+\newif\ifprintchoices
+\newcommand{\printchoices}{\printchoicestrue}
+
+\NewDocumentEnvironment{mychoices}{+b}
+  {%
+    \ifprintchoices
+      \begin{choices}
+        #1
+      \end{choices}
+    \fi
+  }
+  {}
+% -------------------------------------------------------------------------------------------------
+
+% Custom settings ---------------------------------------------------------------------------------
+\printanswers % Comment this out if you don't want to print answers
+\printchoices % Comment this out if you don't want to print choices
+% \fixheightboxtrue
+\addpoints % Automatically add points to questions
+% \pointformat{\hspace*{-0.5em}} % Hides points associated with each question
+% Custom settings ---------------------------------------------------------------------------------
+
+% Title -------------------------------------------------------------------------------------------
+\title{
+  LaTeX Preview for \texttt{tex2moodle}
+}
+\author{}
+\date{}
+%--------------------------------------------------------------------------------------------------
+
+\begin{document}
+\maketitle
+%==================================================================================================
+\begin{questions}
+\fullwidth{
+  \input{description.tex}
+}
+\newcommand{\mypoints}{0}
+\input{multiplechoice_question.tex}
+\end{questions}
+%==================================================================================================
+\end{document}
