@@ -1,43 +1,100 @@
 # tex2moodle
 
-Small Python scripts that convert individual LaTeX snippets into Moodle XML.
-
-Requires Python 3. No additional Python packages are needed.
+tex2moodle converts supported LaTeX files into Moodle XML for importing descriptions and single-answer multiple-choice questions into a Moodle question bank.
 
 ## Usage
 
-Run the appropriate script with the path to a LaTeX file:
+Open a terminal in the project folder, which contains `main.py`. Run the following commands from there.
+
+To convert the supplied supported LaTeX files individually:
 
 ```bash
-python3 /path/to/tex2moodle/tex2moodle_desc.py description.tex
-python3 /path/to/tex2moodle/tex2moodle_mcq.py question.tex
+python3 main.py tests/supported_description.tex
+python3 main.py tests/supported_multiplechoice_question.tex
 ```
 
-Replace `/path/to/tex2moodle` with the location of this project. Input files can live anywhere.
+An argument ending in `.tex` converts one supported LaTeX file and keeps its individual `.xml` output beside it. An existing output with the same name is overwritten.
 
-Each script saves an XML file beside the input file, using the same filename with an `.xml` extension. An existing output file is overwritten.
-
-## Supported input
-
-- `tex2moodle_desc.py`: creates a Moodle description and converts `\subsection*{...}` into an HTML heading.
-- `tex2moodle_mcq.py`: creates a single-answer multiple-choice question from `\question` followed by a `mychoices` environment. Use one `\CorrectChoice` and mark the remaining answers with `\choice`.
-
-Both scripts convert inline mathematics from `$...$` to `\(...\)`. They support specific LaTeX patterns rather than general LaTeX documents. See `tests/` for examples.
-
-## Manual tests
-
-From the project directory, run:
+For batches, give related supported LaTeX files a common filename prefix. For example, `01_logic_description.tex` and `01_logic_question1.tex` share the prefix `01_logic`. If these files are stored directly in the project folder, use:
 
 ```bash
-python3 tex2moodle_desc.py tests/description.tex
-python3 tex2moodle_mcq.py tests/multiplechoice_question.tex
+python3 main.py 01_logic
 ```
 
-Import the generated XML files into Moodle and check that:
+This produces `01_logic2moodle.xml`. To select every `.tex` file directly in the project folder and produce `2moodle.xml`, use an empty prefix:
 
-- The description heading and text display correctly.
-- Mathematics displays correctly in the description, question, and choices.
-- The correct answer is recognised.
-- The text inside `solutionorbox` does not appear.
+```bash
+python3 main.py ""
+```
 
-`tests/latex_preview.tex` provides a LaTeX preview.
+For a prefix, the program:
+
+1. Converts matching supported LaTeX files in filename order, choosing description or multiple-choice conversion for each.
+2. Merges matching Moodle XML files into `<prefix>2moodle.xml`.
+3. Deletes the individual XML files after the merged output is written successfully.
+
+Prefixes are literal filename prefixes; `""` matches every filename. Subfolders are not searched. Every selected `.tex` file must be a supported LaTeX file: selection checks filenames, not contents.
+
+Existing matching XML files are also merged and deleted. The merged output itself is excluded from the inputs and replaced on each successful run. The LaTeX source files are retained. If conversion or merging fails, cleanup does not run.
+
+## Supported LaTeX files
+
+Use the [description example](tests/supported_description.tex) and [multiple-choice example](tests/supported_multiplechoice_question.tex) as templates for your own supported LaTeX files.
+
+- **Descriptions:** filenames containing `description` become Moodle descriptions.
+- **Multiple-choice questions:** files with other names must contain one `\question` followed by a `mychoices` environment. Mark one answer with `\CorrectChoice` and the remaining answers with `\choice`.
+
+Supported content includes:
+
+- Simple `\subsection*{...}` headings, converted to HTML headings.
+- Inline maths written as `$...$`, converted to `\(...\)` with missing spaces added around unescaped `<`, `>` and `&` inside maths.
+- Simple unnumbered (`itemize`) and numbered (`enumerate`) lists, converted to HTML lists.
+
+Nested lists, custom list labels/options, display maths and `\input` expansion are unsupported. `tests/latex_preview.tex` relies on `\input` and is not a supported LaTeX file for conversion; exclude it from batches.
+
+## Check the output
+
+Import the generated XML into Moodle. Check that headings, maths and lists display correctly, the correct answer is recognised, and the text inside `solutionorbox` is absent. `tests/latex_preview.pdf` shows the LaTeX examples for comparison.
+
+## Run from any folder on Linux
+
+These instructions make the `tex2moodle` command available to your Linux user account in Bash terminals.
+
+From the project folder, run `pwd` to find its full path. Replace `/absolute/path/to/tex2moodle` below with that path, then run these commands to create the launcher:
+
+```bash
+mkdir -p "$HOME/.local/bin"
+
+cat > "$HOME/.local/bin/tex2moodle" <<'EOF'
+#!/bin/sh
+exec python3 "/absolute/path/to/tex2moodle/main.py" "$@"
+EOF
+
+chmod +x "$HOME/.local/bin/tex2moodle"
+```
+
+Open `~/.bashrc` in a text editor and add this line if it is not already present. This tells Bash where to find the launcher:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Save `~/.bashrc`, then reload it in your terminal and check the command:
+
+```bash
+source "$HOME/.bashrc"
+command -v tex2moodle
+tex2moodle --help
+```
+
+`command -v` should print the path to `~/.local/bin/tex2moodle`. The setting persists in new Bash terminals.
+
+To use the installed command, open a terminal in the folder containing your supported LaTeX files:
+
+```bash
+tex2moodle question.tex  # Convert one supported LaTeX file
+tex2moodle 01_logic      # Convert and merge files with this prefix
+tex2moodle ""            # Convert and merge all .tex files; all must be supported
+```
+
+Replace `question.tex` or `01_logic` with your filename or prefix. Output files are saved in the same folder, following the conversion and deletion rules above.
