@@ -27,7 +27,9 @@ def main():
 
 		# Stop if the supplied file does not exist.
 		if not myLaTeXfile.is_file():
-			myParser.error(f"File not found: {myLaTeXfile}")
+			myParser.error(
+				f"Input is not an existing file: {myLaTeXfile.resolve()}"
+			)
 
 		myLaTeXfiles = [myLaTeXfile]
 
@@ -45,7 +47,10 @@ def main():
 		# Stop if no LaTeX files match the prefix.
 		if not myLaTeXfiles:
 			myParser.error(
-				f"No .tex files starting with '{myInput}' in the current folder."
+				f"No .tex files starting with '{myInput}' in:\n"
+				f"{myFolder}\n"
+				"Files ending in _chatgpt before .tex are excluded "
+				"(ignoring case)."
 			)
 
 	# Convert each selected supported LaTeX file into an individual XML file.
@@ -66,7 +71,15 @@ def main():
 		# Delete only the source XML files returned by the successful merge.
 		# The merged output is excluded from this list by merge2moodle().
 		for myXMLfile in myXMLfiles:
-			myXMLfile.unlink()
+			try:
+				myXMLfile.unlink()
+			except OSError as myError:
+				myMergedXMLfile = myFolder / f"{myInput}2moodle.xml"
+				raise RuntimeError(
+					f"Merged XML saved to: {myMergedXMLfile}\n"
+					f"Could not delete individual XML file: "
+					f"{myXMLfile.resolve()}"
+				) from myError
 
 # Run the program when this file is executed directly.
 if __name__ == "__main__":

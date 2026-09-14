@@ -4,7 +4,13 @@ from tex2moodle import tex2moodle
 
 def mcq2moodle(myLaTeXfile: Path) -> None:
 	"""Convert supported LaTeX multiple-choice question file to Moodle-compatible XML format."""
-	myLaTeXtext = myLaTeXfile.read_text(encoding="utf-8")
+	try:
+		myLaTeXtext = myLaTeXfile.read_text(encoding="utf-8")
+	except (OSError, UnicodeError) as myError:
+		raise RuntimeError(
+			f"Could not read the LaTeX file as UTF-8:\n"
+			f"{myLaTeXfile.resolve()}"
+		) from myError
 
 	# Prepare question
 	## Extract the question text: everything between \question and \begin{mychoices}
@@ -15,7 +21,11 @@ def mcq2moodle(myLaTeXfile: Path) -> None:
 	)
 
 	if myMatch is None:
-		raise ValueError("Question not found.")
+		raise ValueError(
+			f"Question not found in: {myLaTeXfile.resolve()}\n"
+			"Expected \\question followed by \\begin{mychoices}.\n\n"
+			f"LaTeX content:\n{myLaTeXtext}"
+		)
 
 	myLaTeXquestion = myMatch.group(1).strip()
 
@@ -31,7 +41,11 @@ def mcq2moodle(myLaTeXfile: Path) -> None:
 	)
 
 	if myMatch is None:
-		raise ValueError("Choices not found.")
+		raise ValueError(
+			f"Choices not found in: {myLaTeXfile.resolve()}\n"
+			"Expected \\begin{mychoices} followed by \\end{mychoices}.\n\n"
+			f"LaTeX content:\n{myLaTeXtext}"
+		)
 
 	myLaTeXchoices = myMatch.group(1).strip()
 
@@ -41,6 +55,13 @@ def mcq2moodle(myLaTeXfile: Path) -> None:
 		myLaTeXchoices,
 		re.DOTALL
 	)
+
+	if not myChoices:
+		raise ValueError(
+			f"No answer choices found in: {myLaTeXfile.resolve()}\n"
+			"Expected \\choice or \\CorrectChoice inside mychoices.\n\n"
+			f"Choices content:\n{myLaTeXchoices}"
+		)
 
 	## Convert each choice for Moodle
 	myXMLchoices = []
@@ -95,4 +116,10 @@ def mcq2moodle(myLaTeXfile: Path) -> None:
 
 	# Save the XML beside the original LaTeX file
 	myXMLfile = myLaTeXfile.with_suffix(".xml")
-	myXMLfile.write_text(myXML, encoding="utf-8")
+	try:
+		myXMLfile.write_text(myXML, encoding="utf-8")
+	except (OSError, UnicodeError) as myError:
+		raise RuntimeError(
+			f"Could not write the XML file:\n"
+			f"{myXMLfile.resolve()}"
+		) from myError

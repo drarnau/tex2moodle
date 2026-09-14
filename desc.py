@@ -3,7 +3,13 @@ from pathlib import Path
 
 def desc2moodle(myLaTeXfile: Path) -> None:
 	"""Convert supported LaTeX exercise description file to Moodle XML format."""
-	myLaTeXdesc = myLaTeXfile.read_text(encoding="utf-8")
+	try:
+		myLaTeXdesc = myLaTeXfile.read_text(encoding="utf-8")
+	except (OSError, UnicodeError) as myError:
+		raise RuntimeError(
+			f"Could not read the LaTeX file as UTF-8:\n"
+			f"{myLaTeXfile.resolve()}"
+		) from myError
 
 	# Convert LaTeX to Moodle-compatible XML
 	myXMLdesc = tex2moodle(myLaTeXdesc)
@@ -28,4 +34,10 @@ def desc2moodle(myLaTeXfile: Path) -> None:
 
 	# Save the XML beside the original LaTeX file
 	myXMLfile = myLaTeXfile.with_suffix(".xml")
-	myXMLfile.write_text(myXML, encoding="utf-8")
+	try:
+		myXMLfile.write_text(myXML, encoding="utf-8")
+	except (OSError, UnicodeError) as myError:
+		raise RuntimeError(
+			f"Could not write the XML file:\n"
+			f"{myXMLfile.resolve()}"
+		) from myError
