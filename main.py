@@ -32,13 +32,13 @@ def main():
 		myLaTeXfiles = [myLaTeXfile]
 
 	else:
-		# Select .tex files beginning with the prefix, in filename order.
-		# Search only the folder where the command was run.
+		# Select matching .tex files, excluding names ending in _ChatGPT.
 		myLaTeXfiles = sorted(
 			myFile
 			for myFile in myFolder.iterdir()
 			if myFile.name.startswith(myInput)
 			and myFile.suffix == ".tex"
+			and not myFile.stem.lower().endswith("_chatgpt")
 			and myFile.is_file()
 		)
 

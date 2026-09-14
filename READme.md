@@ -21,7 +21,7 @@ For batches, give related supported LaTeX files a common filename prefix. For ex
 python3 main.py 01_logic
 ```
 
-This produces `01_logic2moodle.xml`. To select every `.tex` file directly in the project folder and produce `2moodle.xml`, use an empty prefix:
+This produces `01_logic2moodle.xml`. To run batch conversion without a filename prefix and produce `2moodle.xml`, use an empty prefix:
 
 ```bash
 python3 main.py ""
@@ -35,7 +35,9 @@ For a prefix, the program:
 
 Prefixes are literal filename prefixes; `""` matches every filename. Subfolders are not searched. Every selected `.tex` file must be a supported LaTeX file: selection checks filenames, not contents.
 
-Existing matching XML files are also merged and deleted. The merged output itself is excluded from the inputs and replaced on each successful run. The LaTeX source files are retained. If conversion or merging fails, cleanup does not run.
+Batch conversion skips filenames ending in `_chatgpt` before `.tex`, regardless of capitalisation. For example, `01_logic_ChatGPT.tex` and `01_logic_CHATGPT.tex` are excluded, including when the prefix is empty. A supported LaTeX file supplied explicitly is still converted.
+
+Existing matching XML files are also merged and deleted, including files such as `01_logic_ChatGPT.xml`: the exclusion applies only to selecting LaTeX files. The merged output itself is excluded from the inputs and replaced on each successful run. The LaTeX source files are retained. If conversion or merging fails, cleanup does not run.
 
 ## Supported LaTeX files
 
@@ -94,7 +96,7 @@ To use the installed command, open a terminal in the folder containing your supp
 ```bash
 tex2moodle question.tex  # Convert one supported LaTeX file
 tex2moodle 01_logic      # Convert and merge files with this prefix
-tex2moodle ""            # Convert and merge all .tex files; all must be supported
+tex2moodle ""            # Batch conversion without a prefix, applying the exclusions above
 ```
 
 Replace `question.tex` or `01_logic` with your filename or prefix. Output files are saved in the same folder, following the conversion and deletion rules above.
