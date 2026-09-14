@@ -26,6 +26,25 @@ def inlinemath2moodle(match):
 	# Substiute $...$ with \(...\)
 	return rf"\({mymathtex}\)"
 
+def list2moodle(match):
+	"""Convert a simple LaTeX list to Moodle-compatible XML text."""
+	myEnvironment = match.group(1)
+	myContent = match.group(2)
+
+	if myEnvironment == "itemize":
+		myTag = "ul"
+	else:
+		myTag = "ol"
+
+	myItems = re.split(r"\\item\b\s*", myContent)[1:]
+
+	myXMLitems = "\n".join(
+		f"<li>{myItem.strip()}</li>"
+		for myItem in myItems
+	)
+
+	return f"<{myTag}>\n{myXMLitems}\n</{myTag}>"
+
 def tex2moodle(mytex: str) -> str:
 	"""Convert supported LaTeX text to Moodle-compatible XML text."""
 
@@ -34,6 +53,14 @@ def tex2moodle(mytex: str) -> str:
 		r"\\subsection\*\{([^{}]*)\}",
 		r"<h3>\1</h3>",
 		mytex,
+	)
+
+	# Convert simple numbered and unnumbered lists
+	mytex = re.sub(
+		r"\\begin\{(itemize|enumerate)\}(.*?)\\end\{\1\}",
+		list2moodle,
+		mytex,
+		flags=re.DOTALL,
 	)
 
 	## Convert inline math (cath everything between $...$)
