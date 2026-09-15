@@ -1,29 +1,32 @@
 import re
 
-def inlinemath2moodle(match):
-	r"""Prepare inline maths for Moodle-compatible XML inline math:
+def math2moodle(match, display=False):
+	r"""Prepare LaTeX maths for Moodle-compatible XML math:
 	(1) Add spaces around literal <, >, and & (in case there are not).
 	(2) Substitute $...$ with \(...\).
 	"""
-	# Use text within $...$ (exlude $ signs)
 	mymathtex = match.group(1)
 
-	# Add spaces around literal <, >, and & (in case there are not)
-	## Add a missing space before
+	if display:
+		mymathtex = mymathtex.strip()
+
+	# Add a missing space before unescaped <, >, and &
 	mymathtex = re.sub(
 		r"(?<![\\ ])([<>&])",
 		r" \1",
 		mymathtex,
 	)
 
-	## Add a missing space after the character
+	# Add a missing space after unescaped <, >, and &
 	mymathtex = re.sub(
 		r"(?<!\\)([<>&])(?! )",
 		r"\1 ",
 		mymathtex,
 	)
 
-	# Substiute $...$ with \(...\)
+	if display:
+		return rf"\[{mymathtex}\]"
+
 	return rf"\({mymathtex}\)"
 
 def list2moodle(match):
@@ -77,10 +80,18 @@ def tex2moodle(mytex: str) -> str:
 		flags=re.DOTALL,
 	)
 
-	## Convert inline math (cath everything between $...$)
+	# Convert unnumbered display equations (\begin{equation*}...\end{equation*})
+	mytex = re.sub(
+		r"\\begin\{equation\*\}(.*?)\\end\{equation\*\}",
+		lambda match: math2moodle(match, display=True),
+		mytex,
+		flags=re.DOTALL,
+	)
+
+	# Convert inline maths ($...$)
 	mytex = re.sub(
 		r"\$([^$]*)\$",
-		inlinemath2moodle,
+		math2moodle,
 		mytex,
 	)
 
