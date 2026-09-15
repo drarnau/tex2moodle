@@ -1,7 +1,7 @@
 import re
 
 def inlinemath2moodle(match):
-	r"""Prepare inline maths for Moodle-compatible XML text:
+	r"""Prepare inline maths for Moodle-compatible XML inline math:
 	(1) Add spaces around literal <, >, and & (in case there are not).
 	(2) Substitute $...$ with \(...\).
 	"""
@@ -27,7 +27,7 @@ def inlinemath2moodle(match):
 	return rf"\({mymathtex}\)"
 
 def list2moodle(match):
-	"""Convert a simple LaTeX list to Moodle-compatible XML text."""
+	"""Convert a simple LaTeX list to Moodle-compatible XML list."""
 	myEnvironment = match.group(1)
 	myContent = match.group(2)
 
@@ -52,6 +52,20 @@ def tex2moodle(mytex: str) -> str:
 	mytex = re.sub(
 		r"\\subsection\*\{([^{}]*)\}",
 		r"<h3>\1</h3>",
+		mytex,
+	)
+
+	# Convert simple bold text
+	mytex = re.sub(
+		r"\\textbf\s*\{([^{}]*)\}",
+		r"<strong>\1</strong>",
+		mytex,
+	)
+
+	# Convert simple italic text
+	mytex = re.sub(
+		r"\\textit\s*\{([^{}]*)\}",
+		r"<em>\1</em>",
 		mytex,
 	)
 
