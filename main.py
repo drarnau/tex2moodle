@@ -16,6 +16,12 @@ def main():
 		help="A supported LaTeX file or a filename prefix in the current folder.",
 	)
 
+	myParser.add_argument(
+		"--penalty",
+		action="store_true",
+		help="Apply a penalty to incorrect multiple-choice answers.",
+	)
+
 	# Read the argument and identify the folder where the command was run.
 	myArgs = myParser.parse_args()
 	myInput = myArgs.input
@@ -61,7 +67,7 @@ def main():
 
 		# Other filenames are converted as multiple-choice questions.
 		else:
-			mcq2moodle(myLaTeXfile)
+			mcq2moodle(myLaTeXfile, penalty=myArgs.penalty)
 
 	# For a prefix, merge the matching XML files into <prefix>2moodle.xml.
 	# For a single .tex argument, keep its individual XML file.

@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 from tex2moodle import tex2moodle
 
-def mcq2moodle(myLaTeXfile: Path) -> None:
+def mcq2moodle(myLaTeXfile: Path, penalty: bool = False) -> None:
 	"""Convert supported LaTeX multiple-choice question file to Moodle-compatible XML format."""
 	try:
 		myLaTeXtext = myLaTeXfile.read_text(encoding="utf-8")
@@ -92,7 +92,7 @@ def mcq2moodle(myLaTeXfile: Path) -> None:
   """
 
 	## Add the choices
-	myWrongFraction = -100 / len(myXMLchoices)
+	myWrongFraction = -100 / len(myXMLchoices) if penalty else 0
 
 	for myType, myText in myXMLchoices:
 		if myType == "CorrectChoice":
