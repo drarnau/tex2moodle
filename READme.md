@@ -90,7 +90,13 @@ Descriptions are unaffected. XML files merged without being regenerated keep the
 
 ## Prepare your LaTeX files
 
-Use UTF-8 text and a `.tex` extension. Start with these templates:
+Use UTF-8 text and a `.tex` extension.
+
+**Input `.tex` files are expected to contain no LaTeX comments.** This includes full-line and trailing comments introduced by an unescaped `%`.
+
+If a possible comment is detected, the converter prints a warning naming the file and continues. It does not remove comments, so they may appear in the XML or interfere with question and answer parsing.
+
+Start with these templates:
 
 - [Description](tests/supported_description.tex): a filename containing lowercase `description` creates a Moodle description.
 - [Multiple-choice question](tests/supported_multiplechoice_question.tex): other filenames create multiple-choice questions. Each file must contain one `\question` followed by a `mychoices` environment. Mark one answer with `\CorrectChoice` and the others with `\choice`.

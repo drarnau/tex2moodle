@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from tex2moodle import tex2moodle
+from tex2moodle import checktexcomment, tex2moodle
 
 def mcq2moodle(myLaTeXfile: Path, penalty: bool = False) -> None:
 	"""Convert supported LaTeX multiple-choice question file to Moodle-compatible XML format."""
@@ -11,6 +11,9 @@ def mcq2moodle(myLaTeXfile: Path, penalty: bool = False) -> None:
 			f"Could not read the LaTeX file as UTF-8:\n"
 			f"{myLaTeXfile.resolve()}"
 		) from myError
+
+	# Warn about possible comments before extracting and converting the question
+	checktexcomment(myLaTeXtext, myLaTeXfile)
 
 	# Prepare question
 	## Extract the question text: everything between \question and \begin{mychoices}

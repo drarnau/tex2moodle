@@ -1,4 +1,16 @@
 import re
+import sys
+from pathlib import Path
+
+def checktexcomment(mytex: str, myLaTeXfile: Path) -> None:
+	"""Warn once about a possible LaTeX comment without changing the text."""
+	# Under standard LaTeX rules, an even number of backslashes before %
+	# leaves it unescaped. Verbatim text and custom catcodes are not handled.
+	if re.search(r"(?<!\\)(?:\\\\)*%", mytex):
+		print(
+			f"Warning: {myLaTeXfile.name} may contain a LaTeX comment. Delete to avoid unexpected behaviour.",
+			file=sys.stderr,
+		)
 
 def math2moodle(match, display=False):
 	r"""Prepare LaTeX maths for Moodle-compatible XML math:

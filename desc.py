@@ -1,4 +1,4 @@
-from tex2moodle import tex2moodle
+from tex2moodle import checktexcomment, tex2moodle
 from pathlib import Path
 
 def desc2moodle(myLaTeXfile: Path) -> None:
@@ -10,6 +10,9 @@ def desc2moodle(myLaTeXfile: Path) -> None:
 			f"Could not read the LaTeX file as UTF-8:\n"
 			f"{myLaTeXfile.resolve()}"
 		) from myError
+
+	# Warn about possible comments before converting the file
+	checktexcomment(myLaTeXdesc, myLaTeXfile)
 
 	# Convert LaTeX to Moodle-compatible XML
 	myXMLdesc = tex2moodle(myLaTeXdesc)
